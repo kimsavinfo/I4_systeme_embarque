@@ -2,5 +2,7 @@
 
 Projet :
 Reconnaissance QR Code
+
 OK : lumière verte, musique
-KO : lumière rouge, capture, email
+
+KO : lumière rouge, capture via GoPRO, email
