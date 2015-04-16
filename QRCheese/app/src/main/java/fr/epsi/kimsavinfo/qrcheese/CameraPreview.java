@@ -17,10 +17,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Camera camera;
     private Camera.PreviewCallback recogniseQRCode;
 
-    public CameraPreview(Context context, Camera camera)
+    public CameraPreview(Context _context, Camera _camera)
     {
-        super(context);
-        this.camera = camera;
+        super(_context);
+        this.camera = _camera;
         recogniseQRCode = CameraPreviewCallback.recogniseQRCode();
 
         surfaceHolder = getHolder();
@@ -30,11 +30,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder)
+    public void surfaceCreated(SurfaceHolder _holder)
     {
         try
         {
-            camera.setPreviewDisplay(holder);
+            camera.setPreviewDisplay(_holder);
             camera.startPreview();
         }
         catch (IOException e)
@@ -44,7 +44,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+    public void surfaceChanged(SurfaceHolder _holder, int _format, int _width, int _height)
     {
         if (surfaceHolder.getSurface() != null)
         {
@@ -73,7 +73,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder)
+    public void surfaceDestroyed(SurfaceHolder _holder)
     {
         // Nothing special for the moment
     }

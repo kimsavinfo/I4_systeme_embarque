@@ -11,6 +11,8 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
+import fr.epsi.kimsavinfo.qrcheese.Lib_Binary.BinaryManager;
+
 /**
  * Created by kimsavinfo on 16/04/15.
  */
@@ -43,7 +45,7 @@ public class CameraPreviewCallback
                     result = multiFormatReader.decode(bitmap, null);
                     if (result != null)
                     {
-                        Log.d("QRC", result.getText());
+                        manageQRCodeResult(result);
                     }
                 } catch (NotFoundException e)
                 {
@@ -51,5 +53,17 @@ public class CameraPreviewCallback
                 }
             }
         };
+    }
+
+    // Ex :
+    // 01110101011100110110010101110010////01110101011100110110010101110010
+    // -> toto
+    // -> keepcalm
+    private static void manageQRCodeResult(Result _result)
+    {
+        String[] arguments = (_result.getText()).split("////");
+        Log.d("QRC", _result.getText());
+        Log.d("QRC", arguments[0]+" -> "+BinaryManager.binaryToASCII(arguments[0]));
+        Log.d("QRC", arguments[1]+" -> "+BinaryManager.binaryToASCII(arguments[1]));
     }
 }
