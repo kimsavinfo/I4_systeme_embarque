@@ -2,7 +2,8 @@
 
 require_once("models/user.inc.php");
 
-$logs = "INIT";
+$output = array();
+
 if( !empty($_GET['login']) && !empty($_GET['password']) )
 {
 	$args_user = array();
@@ -13,29 +14,10 @@ if( !empty($_GET['login']) && !empty($_GET['password']) )
 	if(count($users) == 1)
 	{
 		$user_connected  = array_pop($users);
-		print_r($user_connected);
-		$logs = "OK";
+		$bdd_row["reponse"] = utf8_encode("ok");
 	}
-	else
-	{
-		$logs = "nb user = ".count($users);
-	}
-}
-else
-{
-	$logs = "EMPTY";
 }
 
+$output[] = $bdd_row;
+print(json_encode($output));
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1"> 
-	<title>Systeme Embarque - QRCode</title>
-</head>
-<body>
-	<h1>QRCHEESE</h1>
-	<?php echo $logs; ?>
-</body>
-</html>

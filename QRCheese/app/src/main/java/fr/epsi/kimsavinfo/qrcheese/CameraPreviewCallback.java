@@ -12,6 +12,7 @@ import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
 import fr.epsi.kimsavinfo.qrcheese.Lib_Binary.BinaryManager;
+import fr.epsi.kimsavinfo.qrcheese.Lib_WebService.WebServiceManager;
 
 /**
  * Created by kimsavinfo on 16/04/15.
@@ -19,6 +20,7 @@ import fr.epsi.kimsavinfo.qrcheese.Lib_Binary.BinaryManager;
 public class CameraPreviewCallback
 {
     private static MultiFormatReader multiFormatReader = new MultiFormatReader();
+    private static WebServiceManager webServiceManager = new WebServiceManager();
 
     public static Camera.PreviewCallback recogniseQRCode()
     {
@@ -59,11 +61,30 @@ public class CameraPreviewCallback
     // 01110101011100110110010101110010////01110101011100110110010101110010
     // -> toto
     // -> keepcalm
+    // Adresse : http://kimsavinfo.fr/qrcheese/index.php?login=toto&password=keepcalm
     private static void manageQRCodeResult(Result _result)
     {
         String[] arguments = (_result.getText()).split("////");
-        Log.d("QRC", _result.getText());
-        Log.d("QRC", arguments[0]+" -> "+BinaryManager.binaryToASCII(arguments[0]));
-        Log.d("QRC", arguments[1]+" -> "+BinaryManager.binaryToASCII(arguments[1]));
+        String login = "";
+        String password = "";
+        boolean arduinoSignal = false;
+
+        try
+        {
+            BinaryManager.binaryToASCII(arguments[0]);
+            BinaryManager.binaryToASCII(arguments[1]);
+
+            arduinoSignal = webServiceManager.checkUser(login, password);
+        }
+        catch (Exception e)
+        {
+            Log.e("Camera.PreviewCallback - manageQRCodeResult", e.toString());
+
+
+        }
+        finally
+        {
+            // TODO : Arduino = envoyer arduinoSignal
+        }
     }
 }

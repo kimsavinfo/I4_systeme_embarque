@@ -4,8 +4,8 @@
 */
 function Sql_getServer()
 {
-	return "localhost";
-	// return "mysql51-132.perso";
+	// return "localhost";
+	return "mysql51-132.perso";
 }
 function Sql_getLogin()
 {
