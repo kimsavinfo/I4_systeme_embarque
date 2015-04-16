@@ -2,7 +2,9 @@
 <resources>
 
     <string name="app_name">QRCheese</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_main">QRCheese</string>
+    <string name="qr_code_message_init">QR Code please ?</string>
     <string name="action_settings">Settings</string>
+    <string name="qr_code_ko">Can\'t read QR Code</string>
 
 </resources>
