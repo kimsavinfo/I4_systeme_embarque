@@ -1,14 +1,16 @@
 package fr.epsi.kimsavinfo.qrcheese;
 
 import android.app.Activity;
-import android.hardware.Camera;
 import android.os.Bundle;
+import android.hardware.Camera;
 import android.widget.FrameLayout;
+
+import fr.epsi.kimsavinfo.qrcheese.Lib_Camera.CameraManager;
 
 public class MainActivity extends Activity
 {
-    private Camera mCamera;
-    private CameraPreview mPreview;
+    private Camera camera;
+    private CameraPreview cameraPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -16,14 +18,10 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Create an instance of Camera
-        mCamera = Lib_Camera.getCameraInstance();
-
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
+        camera = CameraManager.getCameraInstance(true);
+        cameraPreview = new CameraPreview(this, camera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
+        preview.addView(cameraPreview);
     }
-
 
 }
