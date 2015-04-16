@@ -1,12 +1,8 @@
 package fr.epsi.kimsavinfo.qrcheese;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.FrameLayout;
 
 public class MainActivity extends Activity
