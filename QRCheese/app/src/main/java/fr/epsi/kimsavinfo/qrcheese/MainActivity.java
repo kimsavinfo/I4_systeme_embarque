@@ -8,6 +8,10 @@ import android.hardware.Camera;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ToggleButton;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -22,6 +26,7 @@ public class MainActivity extends Activity
     private Camera camera;
     private CameraPreview cameraPreview;
     private EmailManager emailManager;
+    private FileOutputStream mOutputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -91,6 +96,28 @@ public class MainActivity extends Activity
 
     public void sendSignal(View view)
     {
-        Log.d("sendSignal", "OK");
+        ToggleButton buttonLED = (ToggleButton) findViewById(R.id.toggleButtonLED);
+        byte[] buffer = new byte[1];
+        if(buttonLED.isChecked())
+        {
+            buffer[0] = (byte) 0; // button says on, light is off
+        }
+        else
+        {
+            buffer[0] = (byte) 1; // button says off, light is on
+        }
+
+        if (mOutputStream != null)
+        {
+            try
+            {
+                mOutputStream.write(buffer);
+                Log.d("sendSignal", "OK");
+            }
+            catch (IOException e)
+            {
+                Log.e("sendSignal", "write failed", e);
+            }
+        }
     }
 }
