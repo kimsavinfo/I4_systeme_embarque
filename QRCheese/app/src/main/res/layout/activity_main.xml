@@ -12,4 +12,25 @@
         android:layout_weight="1"
         />
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="70dip"
+        android:layout_height="fill_parent"
+        >
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:id="@+id/email_button"
+            android:onClick="sendEmail"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Arduino"
+            android:id="@+id/arduino_button"
+            android:onClick="sendSignal"/>
+    </LinearLayout>
+
 </LinearLayout>

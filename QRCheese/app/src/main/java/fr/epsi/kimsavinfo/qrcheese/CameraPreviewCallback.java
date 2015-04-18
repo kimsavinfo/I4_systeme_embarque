@@ -49,9 +49,14 @@ public class CameraPreviewCallback
                     {
                         manageQRCodeResult(result);
                     }
-                } catch (NotFoundException e)
+                }
+                catch (NotFoundException e)
                 {
-                    Log.e("Camera.PreviewCallback - recogniseQRCode", e.toString());
+                    // Log.d("Camera.PreviewCallback - recogniseQRCode", e.toString());
+                }
+                catch (Exception e)
+                {
+                    Log.e("Camera.PreviewCallback - Exception", e.toString());
                 }
             }
         };
@@ -79,8 +84,6 @@ public class CameraPreviewCallback
         catch (Exception e)
         {
             Log.e("Camera.PreviewCallback - manageQRCodeResult", e.toString());
-
-
         }
         finally
         {
