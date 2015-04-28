@@ -47,21 +47,20 @@ public class WebServiceManager
 
     public boolean checkUser(String _login, String _password)
     {
-        boolean arduinoSignal = false;
+        boolean isUserIdentified = false;
 
         login = _login;
         password = _password;
         String uri = construireURL();
         String readJSON = getJSON(uri);
 
-        if(readJSON.length() > 0)
+        if(readJSON.equals("[{\"reponse\":\"ok\"}]"))
         {
-            Log.d("checkUser : OK ",readJSON);
-            arduinoSignal = true;
+            isUserIdentified = true;
         }
         resetUser();
 
-        return arduinoSignal;
+        return isUserIdentified;
     }
 
     public String getJSON(String _uri)

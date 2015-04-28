@@ -49,17 +49,16 @@ public class CameraPreviewCallback
                     result = multiFormatReader.decode(bitmap, null);
                     if (result != null)
                     {
-                        // manageQRCodeResult(result);
                         new QRCodeManagerTask().execute(result);
                     }
                 }
                 catch (Resources.NotFoundException e)
                 {
-                    // Log.d("Camera.PreviewCallback - recogniseQRCode", e.toString());
+                    // Log.d("Camera.PreviewCallback - NotFoundException", e.toString());
                 }
                 catch (Exception e)
                 {
-                    Log.e("Camera.PreviewCallback - Exception", e.toString());
+                    // Log.e("Camera.PreviewCallback - Exception", e.toString());
                 }
             }
         };
@@ -70,36 +69,49 @@ public class CameraPreviewCallback
      ====================================================================== */
 
     // Ex :
-    // 01110101011100110110010101110010////01110101011100110110010101110010
+    // 01110100011011110111010001101111////0110101101100101011001010111000001100011011000010110110001101101
     // -> toto
     // -> keepcalm
     // Adresse : http://kimsavinfo.fr/qrcheese/index.php?login=toto&password=keepcalm
 
     private static
-    class QRCodeManagerTask extends AsyncTask<Result, Void, Void>
+    class QRCodeManagerTask extends AsyncTask<Result, Void, Boolean>
     {
         @Override
-        protected Void doInBackground(Result... _params)
+        protected Boolean doInBackground(Result... _params)
         {
             String[] arguments = (_params[0].getText()).split("////");
             String login = "";
             String password = "";
-            boolean arduinoSignal = false;
+            boolean isUserIdentified = false;
 
-            try {
-                BinaryManager.binaryToASCII(arguments[0]);
-                BinaryManager.binaryToASCII(arguments[1]);
+            try
+            {
+                login = BinaryManager.binaryToASCII(arguments[0]);
+                password = BinaryManager.binaryToASCII(arguments[1]);
 
-                arduinoSignal = webServiceManager.checkUser(login, password);
-                Log.d("manageQRCodeResult", "OK "+ login + "identified");
-            } catch (Exception e) {
-                Log.e("manageQRCodeResult - manageQRCodeResult", e.toString());
-            } finally {
-                // TODO : Arduino = envoyer arduinoSignal
-                Log.d("manageQRCodeResult", "Finally manageQRCodeResult");
+                isUserIdentified = webServiceManager.checkUser(login, password);
+            }
+            catch (Exception e)
+            {
+                Log.e("QRCodeManagerTask - manageQRCodeResult", e.toString());
             }
 
-            return null;
+            return isUserIdentified;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean _isUserIdentified)
+        {
+            if(_isUserIdentified)
+            {
+                Log.v("QRCodeManagerTask  - user identifie", _isUserIdentified.toString());
+            }
+            else
+            {
+                Log.v("QRCodeManagerTask  - user rejete", _isUserIdentified.toString());
+            }
+
         }
     }
 }
