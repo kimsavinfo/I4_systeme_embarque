@@ -1,6 +1,7 @@
 package fr.epsi.kimsavinfo.qrcheese;
 
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.zxing.BinaryBitmap;
@@ -10,6 +11,8 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
+
+import javax.mail.Message;
 
 import fr.epsi.kimsavinfo.qrcheese.Lib_Binary.BinaryManager;
 import fr.epsi.kimsavinfo.qrcheese.Lib_WebService.WebServiceManager;
@@ -47,7 +50,8 @@ public class CameraPreviewCallback
                     result = multiFormatReader.decode(bitmap, null);
                     if (result != null)
                     {
-                        manageQRCodeResult(result);
+                        // manageQRCodeResult(result);
+                        new QRCodeManagerTask().execute(result);
                     }
                 }
                 catch (NotFoundException e)
@@ -62,32 +66,41 @@ public class CameraPreviewCallback
         };
     }
 
+    /** ======================================================================
+     * Send QR code
+     ====================================================================== */
+
     // Ex :
     // 01110101011100110110010101110010////01110101011100110110010101110010
     // -> toto
     // -> keepcalm
     // Adresse : http://kimsavinfo.fr/qrcheese/index.php?login=toto&password=keepcalm
-    private static void manageQRCodeResult(Result _result)
+
+    private static
+    class QRCodeManagerTask extends AsyncTask<Result, Void, Void>
     {
-        String[] arguments = (_result.getText()).split("////");
-        String login = "";
-        String password = "";
-        boolean arduinoSignal = false;
+        @Override
+        protected Void doInBackground(Result... _params)
+        {
+            String[] arguments = (_params[0].getText()).split("////");
+            String login = "";
+            String password = "";
+            boolean arduinoSignal = false;
 
-        try
-        {
-            BinaryManager.binaryToASCII(arguments[0]);
-            BinaryManager.binaryToASCII(arguments[1]);
+            try {
+                BinaryManager.binaryToASCII(arguments[0]);
+                BinaryManager.binaryToASCII(arguments[1]);
 
-            arduinoSignal = webServiceManager.checkUser(login, password);
-        }
-        catch (Exception e)
-        {
-            Log.e("Camera.PreviewCallback - manageQRCodeResult", e.toString());
-        }
-        finally
-        {
-            // TODO : Arduino = envoyer arduinoSignal
+                arduinoSignal = webServiceManager.checkUser(login, password);
+                Log.d("manageQRCodeResult", "OK "+ login + "identified");
+            } catch (Exception e) {
+                Log.e("manageQRCodeResult - manageQRCodeResult", e.toString());
+            } finally {
+                // TODO : Arduino = envoyer arduinoSignal
+                Log.d("manageQRCodeResult", "Finally manageQRCodeResult");
+            }
+
+            return null;
         }
     }
 }
