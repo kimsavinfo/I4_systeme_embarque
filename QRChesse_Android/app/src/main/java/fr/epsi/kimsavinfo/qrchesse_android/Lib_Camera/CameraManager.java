@@ -18,6 +18,7 @@ public class CameraManager
         try
         {
             camera = Camera.open(cameraIndex);
+            camera.setDisplayOrientation(90);
         }
         catch (RuntimeException e)
         {

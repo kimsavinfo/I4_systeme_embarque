@@ -34,6 +34,7 @@ public class CameraPreviewCallback
                 int width = params.getPreviewSize().width;
                 int height = params.getPreviewSize().height;
 
+
                 LuminanceSource source = new PlanarYUVLuminanceSource(data,
                         width, height,
                         0, 0,
