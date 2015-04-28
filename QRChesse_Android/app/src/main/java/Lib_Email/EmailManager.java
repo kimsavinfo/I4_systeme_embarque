@@ -35,9 +35,10 @@ public class EmailManager
         messageBody = "QRCode non identifié";
     }
 
-    public Message createMessage()
+    public Message createMessage(String _messageBody)
     {
         Session session = createSessionObject();
+        messageBody = _messageBody;
 
         Message message = null;
         try {
@@ -78,6 +79,5 @@ public class EmailManager
             }
         });
     }
-
 }
 
