@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="app_name">QRCheese</string>
-    <string name="title_activity_main">Show me a QRCode</string>
-
-
-</resources>
