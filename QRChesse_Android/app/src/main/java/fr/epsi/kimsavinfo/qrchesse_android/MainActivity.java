@@ -55,7 +55,6 @@ public class MainActivity extends Activity {
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
-                    // UsbAccessory accessory = UsbManager.getAccessory(intent);
                     UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 
                     if (intent.getBooleanExtra(
@@ -68,7 +67,6 @@ public class MainActivity extends Activity {
                     mPermissionRequestPending = false;
                 }
             } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
-                // UsbAccessory accessory = UsbManager.getAccessory(intent);
                 UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 
                 if (accessory != null && accessory.equals(mAccessory)) {
