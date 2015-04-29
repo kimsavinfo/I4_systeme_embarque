@@ -41,7 +41,6 @@ public class MainActivity extends Activity {
     // USB
     private ToggleButton buttonLED;
     private static final String ACTION_USB_PERMISSION = "com.google.android.DemoKit.action.USB_PERMISSION";
-    private static final String TAG = "ArduinoAccessory";
     private UsbManager mUsbManager;
     private PendingIntent mPermissionIntent;
     private boolean mPermissionRequestPending;
@@ -49,27 +48,35 @@ public class MainActivity extends Activity {
     ParcelFileDescriptor mFileDescriptor;
     FileInputStream mInputStream;
     FileOutputStream mOutputStream;
+
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             String action = intent.getAction();
-            if (ACTION_USB_PERMISSION.equals(action)) {
+            if (ACTION_USB_PERMISSION.equals(action))
+            {
                 synchronized (this) {
                     UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 
-                    if (intent.getBooleanExtra(
-                            UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
+                    {
                         openAccessory(accessory);
-                    } else {
-                        Log.d(TAG, "permission denied for accessory "
+                    }
+                    else
+                    {
+                        Log.d("BroadcastReceiver", "permission denied for accessory "
                                 + accessory);
                     }
                     mPermissionRequestPending = false;
                 }
-            } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
+            }
+            else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action))
+            {
                 UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 
-                if (accessory != null && accessory.equals(mAccessory)) {
+                if (accessory != null && accessory.equals(mAccessory))
+                {
                     closeAccessory();
                 }
             }
@@ -78,7 +85,8 @@ public class MainActivity extends Activity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -110,50 +118,65 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public Object onRetainNonConfigurationInstance() {
-        if (mAccessory != null) {
+    public Object onRetainNonConfigurationInstance()
+    {
+        if (mAccessory != null)
+        {
             return mAccessory;
-        } else {
+        }
+        else
+        {
             return super.onRetainNonConfigurationInstance();
         }
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
 
-        if (mInputStream != null && mOutputStream != null) {
+        if (mInputStream != null && mOutputStream != null)
+        {
             return;
         }
 
-        // UsbAccessory[] accessories = mUsbManager.getAccessoryList();
         UsbAccessory[] accessories = mUsbManager.getAccessoryList();
 
         UsbAccessory accessory = (accessories == null ? null : accessories[0]);
-        if (accessory != null) {
-            if (mUsbManager.hasPermission(accessory)) {
+        if (accessory != null)
+        {
+            if (mUsbManager.hasPermission(accessory))
+            {
                 openAccessory(accessory);
-            } else {
-                synchronized (mUsbReceiver) {
-                    if (!mPermissionRequestPending) {
+            }
+            else
+            {
+                synchronized (mUsbReceiver)
+                {
+                    if (!mPermissionRequestPending)
+                    {
                         mUsbManager.requestPermission(accessory,mPermissionIntent);
                         mPermissionRequestPending = true;
                     }
                 }
             }
-        } else {
-            Log.d(TAG, "mAccessory is null");
+        }
+        else
+        {
+            Log.d("onResume", "mAccessory is null");
         }
     }
 
     @Override
-    public void onPause() {
+    public void onPause()
+    {
         super.onPause();
         closeAccessory();
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         unregisterReceiver(mUsbReceiver);
         super.onDestroy();
     }
@@ -164,31 +187,39 @@ public class MainActivity extends Activity {
      * ======================================================================
      */
 
-    public void sendEmail(View view) {
+    public void sendEmail(View view)
+    {
         Message message = emailManager.createMessage(messageLoginDenied);
         new SendMailTask().execute(message);
     }
 
-    private class SendMailTask extends AsyncTask<Message, Void, Void> {
+    private class SendMailTask extends AsyncTask<Message, Void, Void>
+    {
         private ProgressDialog progressDialog;
 
         @Override
-        protected void onPreExecute() {
+        protected void onPreExecute()
+        {
             super.onPreExecute();
             progressDialog = ProgressDialog.show(MainActivity.this, "Please wait", "Sending mail", true, false);
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(Void aVoid)
+        {
             super.onPostExecute(aVoid);
             progressDialog.dismiss();
         }
 
         @Override
-        protected Void doInBackground(Message... messages) {
-            try {
+        protected Void doInBackground(Message... messages)
+        {
+            try
+            {
                 Transport.send(messages[0]);
-            } catch (MessagingException e) {
+            }
+            catch (MessagingException e)
+            {
                 Log.e("sendMail - doInBackground ", e.toString());
             }
             return null;
@@ -212,36 +243,52 @@ public class MainActivity extends Activity {
         else
             buffer[0]=(byte)1; // button says off, light is on
 
-        if (mOutputStream != null) {
-            try {
+        if (mOutputStream != null)
+        {
+            try
+            {
                 mOutputStream.write(buffer);
-            } catch (IOException e) {
-                Log.e(TAG, "write failed", e);
+            }
+            catch (IOException e)
+            {
+                Log.e("sendSignal", "write failed", e);
             }
         }
     }
 
-    private void openAccessory(UsbAccessory accessory) {
+    private void openAccessory(UsbAccessory accessory)
+    {
         mFileDescriptor = mUsbManager.openAccessory(accessory);
-        if (mFileDescriptor != null) {
+        if (mFileDescriptor != null)
+        {
             mAccessory = accessory;
             FileDescriptor fd = mFileDescriptor.getFileDescriptor();
             mInputStream = new FileInputStream(fd);
             mOutputStream = new FileOutputStream(fd);
-            Log.d(TAG, "accessory opened");
-        } else {
-            Log.d(TAG, "accessory open fail");
+            Log.d("openAccessory", "accessory opened");
+        }
+        else
+        {
+            Log.d("openAccessory", "accessory open fail");
         }
     }
 
 
-    private void closeAccessory() {
-        try {
-            if (mFileDescriptor != null) {
+    private void closeAccessory()
+    {
+        try
+        {
+            if (mFileDescriptor != null)
+            {
                 mFileDescriptor.close();
             }
-        } catch (IOException e) {
-        } finally {
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
             mFileDescriptor = null;
             mAccessory = null;
         }
