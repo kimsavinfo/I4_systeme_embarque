@@ -20,10 +20,9 @@ import java.util.HashMap;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
-import javax.xml.datatype.Duration;
 
-import Lib_Email.EmailManager;
-import Lib_Email.GmailAccountManager;
+import fr.epsi.kimsavinfo.qrchesse_android.Lib_Email.EmailManager;
+import fr.epsi.kimsavinfo.qrchesse_android.Lib_Email.GmailAccountManager;
 import fr.epsi.kimsavinfo.qrchesse_android.Lib_Camera.CameraManager;
 
 public class MainActivity extends Activity

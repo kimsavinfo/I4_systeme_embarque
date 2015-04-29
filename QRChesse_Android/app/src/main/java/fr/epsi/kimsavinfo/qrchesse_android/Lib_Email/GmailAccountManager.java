@@ -1,4 +1,4 @@
-package Lib_Email;
+package fr.epsi.kimsavinfo.qrchesse_android.Lib_Email;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
