@@ -1,10 +1,17 @@
 package fr.epsi.kimsavinfo.qrchesse_android;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Camera;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +40,7 @@ public class MainActivity extends Activity
     String messageLoginDenied = "QRCode non identifié";
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -50,6 +58,7 @@ public class MainActivity extends Activity
         emailManager = new EmailManager(
                 GmailAccountManager.getAdress(getApplicationContext()),
                 "myPassword");
+
     }
 
     /** ======================================================================
@@ -102,20 +111,11 @@ public class MainActivity extends Activity
     public void sendSignal(View view)
     {
         ToggleButton buttonLED = (ToggleButton) findViewById(R.id.toggleButtonLED);
-        byte[] buffer = new byte[1];
+        /*
         if(buttonLED.isChecked())
-        {
-            buffer[0] = (byte) 0; // button says on, light is off
-        }
-        else
-        {
-            buffer[0] = (byte) 1; // button says off, light is on
-        }
+        */
 
-        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
-        UsbDevice device = deviceList.get("deviceName");
-        Toast.makeText(getApplicationContext(), device.toString(), Toast.LENGTH_LONG);
+
     }
 
 }
