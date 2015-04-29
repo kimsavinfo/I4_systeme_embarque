@@ -49,14 +49,16 @@ public class MainActivity extends Activity {
     FileInputStream mInputStream;
     FileOutputStream mOutputStream;
 
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver()
+    {
         @Override
         public void onReceive(Context context, Intent intent)
         {
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action))
             {
-                synchronized (this) {
+                synchronized (this)
+                {
                     UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
