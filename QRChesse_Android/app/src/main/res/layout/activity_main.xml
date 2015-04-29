@@ -29,8 +29,8 @@
         <ToggleButton
             android:text="Arduino"
             android:id="@+id/toggleButtonLED"
-            android:layout_width="100dip"
-            android:layout_height="100dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:onClick="sendSignal">

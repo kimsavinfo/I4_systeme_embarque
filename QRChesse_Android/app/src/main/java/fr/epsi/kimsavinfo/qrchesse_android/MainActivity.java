@@ -1,37 +1,28 @@
 package fr.epsi.kimsavinfo.qrchesse_android;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Camera;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ToggleButton;
 
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
 
+import fr.epsi.kimsavinfo.qrchesse_android.Lib_Camera.CameraManager;
 import fr.epsi.kimsavinfo.qrchesse_android.Lib_Email.EmailManager;
 import fr.epsi.kimsavinfo.qrchesse_android.Lib_Email.GmailAccountManager;
-import fr.epsi.kimsavinfo.qrchesse_android.Lib_Camera.CameraManager;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity
+{
     // Camera
     private Camera camera;
     private CameraPreview cameraPreview;
@@ -40,51 +31,7 @@ public class MainActivity extends Activity {
     String messageLoginDenied = "QRCode non identifié";
     // USB
     private ToggleButton buttonLED;
-    private static final String ACTION_USB_PERMISSION = "com.google.android.DemoKit.action.USB_PERMISSION";
-    private UsbManager mUsbManager;
-    private PendingIntent mPermissionIntent;
-    private boolean mPermissionRequestPending;
-    UsbAccessory mAccessory;
-    ParcelFileDescriptor mFileDescriptor;
-    FileInputStream mInputStream;
-    FileOutputStream mOutputStream;
-
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver()
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            String action = intent.getAction();
-            if (ACTION_USB_PERMISSION.equals(action))
-            {
-                synchronized (this)
-                {
-                    UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
-                    {
-                        openAccessory(accessory);
-                    }
-                    else
-                    {
-                        Log.d("BroadcastReceiver", "permission denied for accessory "
-                                + accessory);
-                    }
-                    mPermissionRequestPending = false;
-                }
-            }
-            else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action))
-            {
-                UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-
-                if (accessory != null && accessory.equals(mAccessory))
-                {
-                    closeAccessory();
-                }
-            }
-        }
-    };
-
+    private UsbBroadcastReceiver usbReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -108,23 +55,23 @@ public class MainActivity extends Activity {
 
         // USB
         buttonLED = (ToggleButton) findViewById(R.id.toggleButtonLED);
-        mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-        registerReceiver(mUsbReceiver, filter);
-        if (getLastNonConfigurationInstance() != null) {
-            mAccessory = (UsbAccessory) getLastNonConfigurationInstance();
-            openAccessory(mAccessory);
+        usbReceiver = new UsbBroadcastReceiver((UsbManager)getSystemService(Context.USB_SERVICE), this);
+
+        registerReceiver(usbReceiver, usbReceiver.getFilter());
+        if (getLastNonConfigurationInstance() != null)
+        {
+            usbReceiver.setAccessory((UsbAccessory) getLastNonConfigurationInstance());
         }
     }
 
     @Override
     public Object onRetainNonConfigurationInstance()
     {
-        if (mAccessory != null)
+        UsbAccessory usbAccessory = usbReceiver.getAccessory();
+
+        if(usbAccessory != null)
         {
-            return mAccessory;
+            return usbAccessory;
         }
         else
         {
@@ -137,35 +84,15 @@ public class MainActivity extends Activity {
     {
         super.onResume();
 
-        if (mInputStream != null && mOutputStream != null)
+        if(!usbReceiver.areInputsStreamNotNull())
         {
-            return;
-        }
-
-        UsbAccessory[] accessories = mUsbManager.getAccessoryList();
-
-        UsbAccessory accessory = (accessories == null ? null : accessories[0]);
-        if (accessory != null)
-        {
-            if (mUsbManager.hasPermission(accessory))
+            if(usbReceiver.resume())
             {
-                openAccessory(accessory);
-            }
-            else
-            {
-                synchronized (mUsbReceiver)
+                synchronized (usbReceiver)
                 {
-                    if (!mPermissionRequestPending)
-                    {
-                        mUsbManager.requestPermission(accessory,mPermissionIntent);
-                        mPermissionRequestPending = true;
-                    }
+                    usbReceiver.synchronizeAccessory();
                 }
             }
-        }
-        else
-        {
-            Log.d("onResume", "mAccessory is null");
         }
     }
 
@@ -173,13 +100,13 @@ public class MainActivity extends Activity {
     public void onPause()
     {
         super.onPause();
-        closeAccessory();
+        usbReceiver.closeAccessory();
     }
 
     @Override
     public void onDestroy()
     {
-        unregisterReceiver(mUsbReceiver);
+        unregisterReceiver(usbReceiver);
         super.onDestroy();
     }
 
@@ -239,61 +166,13 @@ public class MainActivity extends Activity {
     public void sendSignal(View view)
     {
         byte[] buffer = new byte[1];
+        buffer[0] = (byte) 0;
 
         if(buttonLED.isChecked())
-            buffer[0]=(byte)0; // button says on, light is off
-        else
-            buffer[0]=(byte)1; // button says off, light is on
-
-        if (mOutputStream != null)
         {
-            try
-            {
-                mOutputStream.write(buffer);
-            }
-            catch (IOException e)
-            {
-                Log.e("sendSignal", "write failed", e);
-            }
+            buffer[0] = (byte) 1;
         }
+
+        usbReceiver.sendSignal(buffer);
     }
-
-    private void openAccessory(UsbAccessory accessory)
-    {
-        mFileDescriptor = mUsbManager.openAccessory(accessory);
-        if (mFileDescriptor != null)
-        {
-            mAccessory = accessory;
-            FileDescriptor fd = mFileDescriptor.getFileDescriptor();
-            mInputStream = new FileInputStream(fd);
-            mOutputStream = new FileOutputStream(fd);
-            Log.d("openAccessory", "accessory opened");
-        }
-        else
-        {
-            Log.d("openAccessory", "accessory open fail");
-        }
-    }
-
-
-    private void closeAccessory()
-    {
-        try
-        {
-            if (mFileDescriptor != null)
-            {
-                mFileDescriptor.close();
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            mFileDescriptor = null;
-            mAccessory = null;
-        }
-    }
-
 }

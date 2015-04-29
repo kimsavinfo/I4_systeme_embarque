@@ -19,15 +19,24 @@ void setup()
 void loop()
 {
   byte msg[0];
-  if (acc.isConnected()) {
-    int len = acc.read(msg, sizeof(msg), 1); // read data into msg variable
-    if (len > 0) {
-      if (msg[0] == 1) // compare received data
-        digitalWrite(LED_PIN,HIGH); // turn on light
-      else
-        digitalWrite(LED_PIN,LOW); // turn off light
-    }
+  if (acc.isConnected()) 
+  {
+    // read data sended by Android
+    int len = acc.read(msg, sizeof(msg), 1); 
+    if (len > 0) 
+    {
+       if (msg[0] == 1)
+       { 
+          digitalWrite(LED_PIN,HIGH);
+       }
+       else
+       {
+          digitalWrite(LED_PIN,LOW);
+       }
+     }
   } 
   else
-    digitalWrite(LED_PIN , LOW); // turn off light
+  {
+    digitalWrite(LED_PIN , LOW);
+  }
 }
