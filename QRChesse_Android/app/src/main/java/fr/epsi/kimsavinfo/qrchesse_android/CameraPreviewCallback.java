@@ -1,5 +1,6 @@
 package fr.epsi.kimsavinfo.qrchesse_android;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.Camera;
 import android.os.AsyncTask;
@@ -12,7 +13,13 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Transport;
+
 import fr.epsi.kimsavinfo.qrchesse_android.Lib_Binary.BinaryManager;
+import fr.epsi.kimsavinfo.qrchesse_android.Lib_Email.EmailManager;
+import fr.epsi.kimsavinfo.qrchesse_android.Lib_Email.GmailAccountManager;
 import fr.epsi.kimsavinfo.qrchesse_android.Lib_WebService.WebServiceManager;
 
 /**
@@ -22,9 +29,21 @@ public class CameraPreviewCallback
 {
     private static MultiFormatReader multiFormatReader = new MultiFormatReader();
     private static WebServiceManager webServiceManager = new WebServiceManager();
+    private static UsbBroadcastReceiver usbReceiver;
+    private static EmailManager emailManager;
+    private static String messageLoginDenied = "QRCode non identifié";
 
-    public static Camera.PreviewCallback recogniseQRCode()
+    public static Camera.PreviewCallback recogniseQRCode(Context _context, UsbBroadcastReceiver _usbReceiver)
     {
+        usbReceiver = _usbReceiver;
+        // Email
+        // Get local gmail account
+        // <!> TODO : change  "myPassword"
+        // -> can't get gmail local password whithout publicing the app
+        emailManager = new EmailManager(
+                GmailAccountManager.getAdress(_context),
+                "myPassword");
+
         return new Camera.PreviewCallback()
         {
             @Override
@@ -74,8 +93,7 @@ public class CameraPreviewCallback
     // -> keepcalm
     // Adresse : http://kimsavinfo.fr/qrcheese/index.php?login=toto&password=keepcalm
 
-    private static
-    class QRCodeManagerTask extends AsyncTask<Result, Void, Boolean>
+    private static class QRCodeManagerTask extends AsyncTask<Result, Void, Boolean>
     {
         @Override
         protected Boolean doInBackground(Result... _params)
@@ -100,18 +118,67 @@ public class CameraPreviewCallback
             return isUserIdentified;
         }
 
+        /**
+         * ======================================================================
+         * Send signal to Arduino
+         * 0 : there's an intruder
+         * 1 : the person is allowed to go on
+         * ======================================================================
+         */
         @Override
         protected void onPostExecute(Boolean _isUserIdentified)
         {
+            byte[] buffer = new byte[1];
+
             if(_isUserIdentified)
             {
                 Log.v("QRCodeManagerTask  - user identifie", _isUserIdentified.toString());
+                buffer[0] = (byte) 1;
             }
             else
             {
                 Log.v("QRCodeManagerTask  - user rejete", _isUserIdentified.toString());
+                buffer[0] = (byte) 0;
+
+                Message message = emailManager.createMessage(messageLoginDenied);
+                new SendMailTask().execute(message);
             }
 
+            usbReceiver.sendSignal(buffer);
+        }
+    }
+
+    /**
+     * ======================================================================
+     * Send an email with the Go PRO photo
+     * ======================================================================
+     */
+    private static class SendMailTask extends AsyncTask<Message, Void, Void>
+    {
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Message... messages)
+        {
+            try
+            {
+                Transport.send(messages[0]);
+            }
+            catch (MessagingException e)
+            {
+                Log.e("sendMail - doInBackground ", e.toString());
+            }
+            return null;
         }
     }
 }

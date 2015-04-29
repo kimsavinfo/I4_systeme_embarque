@@ -6,7 +6,7 @@
     >
 
     <FrameLayout
-        android:id="@+id/camera_preview"
+        android:id="@+id/camera_preview_test"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
@@ -22,13 +22,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email"
-            android:id="@+id/email_button"
+            android:id="@+id/email_button_test"
             android:onClick="sendEmail"/>
 
 
         <ToggleButton
             android:text="Arduino"
-            android:id="@+id/toggleButtonLED"
+            android:id="@+id/toggleButtonLED_test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

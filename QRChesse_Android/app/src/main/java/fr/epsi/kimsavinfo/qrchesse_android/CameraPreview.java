@@ -17,11 +17,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Camera camera;
     private Camera.PreviewCallback recogniseQRCode;
 
-    public CameraPreview(Context _context, Camera _camera)
+    public CameraPreview(Context _context, Camera _camera, UsbBroadcastReceiver _usbReceiver)
     {
         super(_context);
         this.camera = _camera;
-        recogniseQRCode = CameraPreviewCallback.recogniseQRCode();
+        recogniseQRCode = CameraPreviewCallback.recogniseQRCode(_context, _usbReceiver);
 
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
