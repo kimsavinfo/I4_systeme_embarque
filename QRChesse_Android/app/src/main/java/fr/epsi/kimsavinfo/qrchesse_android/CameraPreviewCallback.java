@@ -140,6 +140,7 @@ public class CameraPreviewCallback
                 Log.v("QRCodeManagerTask  - user rejete", _isUserIdentified.toString());
                 buffer[0] = (byte) 0;
 
+                // Don't forget to change le password !
                 Message message = emailManager.createMessage(messageLoginDenied);
                 new SendMailTask().execute(message);
             }
